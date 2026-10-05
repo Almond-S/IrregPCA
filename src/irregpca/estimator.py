@@ -128,6 +128,7 @@ class IrregPCA:
         hidden_depth: int = 2,
         activation: str = "tanh",
         model_kwargs: dict[str, Any] | None = None,
+        track_joint_loss: bool = True,
     ) -> None:
         if config is not None:
             self.config = config
@@ -153,6 +154,7 @@ class IrregPCA:
                 activation=activation,
                 model_factory=model_factory,
                 model_kwargs=model_kwargs,
+                track_joint_loss=track_joint_loss,
             )
 
         self._callbacks = callbacks
@@ -260,6 +262,7 @@ class IrregPCA:
             callbacks=self._callbacks,
             measure=measure,
             validation_frequency=cfg.validation_frequency,
+            track_joint_loss=cfg.track_joint_loss,
         )
 
         self.result_ = result
@@ -323,6 +326,7 @@ def fit_irreg_pca(
     hidden_depth: int = 2,
     activation: str = "tanh",
     model_kwargs: dict[str, Any] | None = None,
+    track_joint_loss: bool = True,
 ) -> IrregPCAResult:
     """Fit IrregPCA and return the result in a single call.
 
@@ -333,7 +337,7 @@ def fit_irreg_pca(
     n_components : int
     epochs, lr, patience, valid_split, random_state, device,
     model_factory, verbose, callbacks, training_mode, integration_mode,
-    quadrature_points, measure
+    quadrature_points, measure, track_joint_loss
         See :class:`IrregPCA` and :class:`IrregPCAConfig`.
 
     Returns
@@ -368,6 +372,7 @@ def fit_irreg_pca(
         hidden_depth=hidden_depth,
         activation=activation,
         model_kwargs=model_kwargs,
+        track_joint_loss=track_joint_loss,
     )
     return est.fit(
         data,

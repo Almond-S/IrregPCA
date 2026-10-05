@@ -53,6 +53,14 @@ class IrregPCAConfig:
         (default 4096).
     validation_frequency : int
         Evaluate validation loss every this many epochs (default 1).
+    track_joint_loss : bool
+        Also record the joint loss over *all* models
+        (``LossHistory.joint_train`` / ``joint_valid``) at every validation
+        step (default ``True``). This is a diagnostic only -- early stopping
+        reads each model's own validation loss -- but it evaluates every
+        model and every orthogonality pair twice per epoch, which dominates
+        the run time once there is more than one component. ``False`` leaves
+        those two lists empty and the fit itself unchanged.
     measure : Any or None
         Custom :class:`InnerProductMeasure` instance. If provided,
         overrides ``integration_mode``.
@@ -94,6 +102,7 @@ class IrregPCAConfig:
     integration_mode: str = "grid"
     quadrature_points: int = 4096
     validation_frequency: int = 1
+    track_joint_loss: bool = True
     measure: Any | None = None
     verbose: bool = False
     callbacks: list = field(default_factory=list)

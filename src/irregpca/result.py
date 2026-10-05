@@ -17,7 +17,11 @@ class LossHistory:
     Attributes
     ----------
     joint_train : list of float
+        Joint loss over all models on the training set, one entry per
+        validation step across the whole sequential fit. Empty when the fit
+        was run with ``track_joint_loss=False``.
     joint_valid : list of float
+        As ``joint_train``, on the validation set.
     train_losses : list of list of float
     valid_losses : list of list of float
     best_epochs : list of int

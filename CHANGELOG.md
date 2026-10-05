@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+* `track_joint_loss` option on `IrregPCAConfig`, `IrregPCA`, `fit_irreg_pca()`
+  and `fit_sequential()`. The joint loss over all models
+  (`LossHistory.joint_train` / `joint_valid`) is a diagnostic that nothing in
+  the fit reads -- early stopping uses each model's own validation loss -- yet
+  recording it evaluates every model and every orthogonality pair twice per
+  epoch, which was measured at ~80% of the run time for `n_components = 3`.
+  `track_joint_loss=False` skips it, leaving the two history lists empty and
+  the fitted models bit-identical under `integration_mode="grid"` (under
+  `"monte_carlo"` the skipped evaluations no longer consume quadrature draws,
+  so the random stream differs). The default stays `True`, so existing
+  behaviour is unchanged.
 * `LiveLossPlotCallback` in `irregpca.training.callbacks`: live-updating loss
   plot during training, one subplot per model, with best-epoch marker.
   Exported from the top-level `irregpca` namespace.

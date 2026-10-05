@@ -39,6 +39,7 @@ def fit_sequential(
     callbacks: list[Callable] | None,
     measure: InnerProductMeasure,
     validation_frequency: int = 1,
+    track_joint_loss: bool = True,
 ) -> IrregPCAResult:
     """Fit IrregPCA sequentially, fixing the early-stopping restoration bug.
 
@@ -64,6 +65,18 @@ def fit_sequential(
         Integration measure for inner products.
     validation_frequency : int
         Validate every this many epochs (default 1).
+    track_joint_loss : bool
+        Also record the joint loss over *all* models
+        (``history.joint_train`` / ``history.joint_valid``) at every
+        validation step (default True). Nothing in the fit reads it -- early
+        stopping uses the active model's own validation loss -- but it
+        integrates every model and every orthogonality pair twice per epoch,
+        which dominates the run time for more than one component. With
+        ``False`` the two history lists stay empty and the corresponding
+        ``TrainingEvent`` fields are ``None``. The fitted models are
+        unchanged: bit-identical under ``integration_mode="grid"``; under
+        ``"monte_carlo"`` the skipped evaluations no longer draw quadrature
+        points, so the random stream (and hence the fit) differs.
 
     Returns
     -------
@@ -158,19 +171,24 @@ def fit_sequential(
 
             # validation (at configured frequency)
             if (epoch + 1) % validation_frequency == 0 or epoch == 0:
+                # The joint loss is a diagnostic only; see `track_joint_loss`.
+                joint_train_val: float | None = None
+                joint_valid_val: float | None = None
                 model.eval()
                 with torch.no_grad():
                     loss_valid = lossfns[j](models, data_valid)
-                    joint_train_val = loss_joint(models, data_train).item()
-                    joint_valid_val = loss_joint(models, data_valid).item()
+                    if track_joint_loss:
+                        joint_train_val = loss_joint(models, data_train).item()
+                        joint_valid_val = loss_joint(models, data_valid).item()
 
                 train_loss_val = loss_train.item()
                 valid_loss_val = loss_valid.item()
 
                 history.train_losses[j].append(train_loss_val)
                 history.valid_losses[j].append(valid_loss_val)
-                history.joint_train.append(joint_train_val)
-                history.joint_valid.append(joint_valid_val)
+                if joint_train_val is not None and joint_valid_val is not None:
+                    history.joint_train.append(joint_train_val)
+                    history.joint_valid.append(joint_valid_val)
 
                 # ----- key fix: always restore best state after loop -----
                 checkpoint.maybe_update(valid_loss_val, epoch)

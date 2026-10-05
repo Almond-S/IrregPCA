@@ -192,6 +192,7 @@ result = IrregPCA(config=cfg).fit(sample_ids=..., locations=..., values=...)
 | `verbose` | `bool` | `False` | Print per-epoch progress. |
 | `callbacks` | `list` | `[]` | List of callback objects (e.g. `LiveLossPlotCallback`). |
 | `validation_frequency` | `int` | `1` | Validate every N epochs. Increase to speed up training on large datasets. |
+| `track_joint_loss` | `bool` | `True` | Record the joint loss over all models in `history.joint_train` / `joint_valid`. Diagnostic only; set to `False` to skip it, which can cut run time by several times for `n_components >= 2` without changing the fit. |
 | `device` | `str` or `None` | `None` | Device for training. `None` auto-selects `cuda > mps > cpu`. |
 | `num_workers` | `int` | `0` | DataLoader worker processes. |
 
